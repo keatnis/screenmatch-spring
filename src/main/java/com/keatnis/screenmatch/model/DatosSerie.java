@@ -8,7 +8,7 @@ public record DatosSerie(
         @JsonAlias("Title")
         String titulo,
         @JsonAlias("totalSeasons")
-        String totalTemporadas,
+        Integer totalTemporadas,
         @JsonAlias("imdbRating")
         String evaluacion) {
 
