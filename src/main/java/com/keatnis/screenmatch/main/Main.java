@@ -115,11 +115,22 @@ public class Main {
 //        }
 
         // evaluacion por temporada usando Map<>
-        Map<Integer, Double > evaluacionPorTemporada = episodios.stream()
-                .filter(e-> e.getEvaluacion()>0.0)
+        Map<Integer, Double> evaluacionPorTemporada = episodios.stream()
+                .filter(e -> e.getEvaluacion() > 0.0)
                 .collect(Collectors.groupingBy(Episodio::getTemporada,
-                        Collectors.averagingDouble(Episodio::getEvaluacion )));
+                        Collectors.averagingDouble(Episodio::getEvaluacion)));
         System.out.println(evaluacionPorTemporada);
+
+
+        // Recolectado estadisticas
+
+        DoubleSummaryStatistics dsta = episodios.stream()
+                .filter(e -> e.getEvaluacion() > 0.0)
+                .collect(Collectors.summarizingDouble(Episodio::getEvaluacion));
+      //  System.out.println(dsta);
+        System.out.println("La media de las evaluaciones: " + dsta.getAverage());
+        System.out.println("El episodio mejor evaluado: " + dsta.getMax());
+        System.out.println("el episosdio peor evaluadio: " + dsta.getMin());
 
     }
 }
