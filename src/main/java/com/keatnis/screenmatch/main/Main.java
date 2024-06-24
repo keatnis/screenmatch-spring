@@ -6,8 +6,10 @@ import com.keatnis.screenmatch.model.DatosTemporada;
 import com.keatnis.screenmatch.model.Episodio;
 import com.keatnis.screenmatch.service.ConsumoAPI;
 import com.keatnis.screenmatch.service.ConvierteDatos;
-
 import java.net.URLEncoder;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -40,7 +42,7 @@ public class Main {
             var datosTemporada = conversor.obtenerDatos(json, DatosTemporada.class);
             temporadas.add(datosTemporada);
         }
-       // temporadas.forEach(System.out::println);
+        // temporadas.forEach(System.out::println);
         // usando funciones lambas, que simplifica el uso del los fori
         // (argumentos) -> { cuerpo-de-la-función }
         // (a, b) -> { return a + b; }
@@ -59,9 +61,9 @@ public class Main {
 
         // convertir todas las informaciones a una lista del tipo DatosEpisodio
         //se usa collect(Collectors.toList()); para la lista porque la lista
-            List<DatosEpisodio> datosEpisodios = temporadas.stream()
-                    .flatMap(t -> t.episodios().stream())
-                    .collect(Collectors.toList());
+        List<DatosEpisodio> datosEpisodios = temporadas.stream()
+                .flatMap(t -> t.episodios().stream())
+                .collect(Collectors.toList());
 
         System.out.println("top 5 capitulos ");
         // ordenamos la lista delos datos del episodio
@@ -69,18 +71,36 @@ public class Main {
         datosEpisodios.stream()
                 //usamos filter para filtar e ignorar los capitulos que no tengan evaluacion "N/A"
                 .filter(e -> !e.evaluacion().equalsIgnoreCase("N/A"))
+               //usamos peek para mostrar o hacer una hojeada a los pasos que realiza java para llegar al resultado
+                .peek(e -> System.out.println("primer filtro obteniendo los episodios con evaluacion"))
                 .sorted(Comparator.comparing(DatosEpisodio::evaluacion).reversed())
+                .map(e -> e.titulo().toUpperCase())
                 .limit(5)
                 .forEach(System.out::println);
 
         // convertimos los datos de un episodio a un episodio nuevo,a una lista mutable
         List<Episodio> episodios = temporadas.stream()
                 .flatMap(t -> t.episodios().stream()
-                .map(d -> new Episodio(t.numero(), d)))
+                        .map(d -> new Episodio(t.numero(), d)))
                 .collect(Collectors.toList());
 
-        episodios.forEach(System.out::println);
+        //episodios.forEach(System.out::println);
 
+        // busqueda de episodios a partir de un anio
+        System.out.println("Escriba el anio que desee buscar");
+        var fecha = teclado.nextInt();
+        teclado.nextLine(); // esto se hace para captura bien el dato
 
-}
+        LocalDate fechaBusqueda = LocalDate.of(fecha, 1, 1);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        episodios.stream()
+                .filter(e -> e.getFechaDeLanzamiento() != null && e.getFechaDeLanzamiento().isAfter(fechaBusqueda))
+                .forEach(
+                e -> System.out.println("Titlo " + e.getTitulo() +
+                        "Evaluacion " + e.getEvaluacion() +
+                        "Fecha " + e.getFechaDeLanzamiento().format(formatter)
+                ));
+
+    }
 }
