@@ -6,14 +6,12 @@ import com.keatnis.screenmatch.model.DatosTemporada;
 import com.keatnis.screenmatch.model.Episodio;
 import com.keatnis.screenmatch.service.ConsumoAPI;
 import com.keatnis.screenmatch.service.ConvierteDatos;
+
 import java.net.URLEncoder;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -65,18 +63,18 @@ public class Main {
                 .flatMap(t -> t.episodios().stream())
                 .collect(Collectors.toList());
 
-        System.out.println("top 5 capitulos ");
+        //      System.out.println("top 5 capitulos ");
         // ordenamos la lista delos datos del episodio
         //usando sortde para ordenar por evaluacion y reversed para ordenar de mayor a menor
-        datosEpisodios.stream()
-                //usamos filter para filtar e ignorar los capitulos que no tengan evaluacion "N/A"
-                .filter(e -> !e.evaluacion().equalsIgnoreCase("N/A"))
-               //usamos peek para mostrar o hacer una hojeada a los pasos que realiza java para llegar al resultado
-                .peek(e -> System.out.println("primer filtro obteniendo los episodios con evaluacion"))
-                .sorted(Comparator.comparing(DatosEpisodio::evaluacion).reversed())
-                .map(e -> e.titulo().toUpperCase())
-                .limit(5)
-                .forEach(System.out::println);
+//        datosEpisodios.stream()
+//                //usamos filter para filtar e ignorar los capitulos que no tengan evaluacion "N/A"
+//                .filter(e -> !e.evaluacion().equalsIgnoreCase("N/A"))
+//               //usamos peek para mostrar o hacer una hojeada a los pasos que realiza java para llegar al resultado
+//                .peek(e -> System.out.println("primer filtro obteniendo los episodios con evaluacion"))
+//                .sorted(Comparator.comparing(DatosEpisodio::evaluacion).reversed())
+//                .map(e -> e.titulo().toUpperCase())
+//                .limit(5)
+//                .forEach(System.out::println);
 
         // convertimos los datos de un episodio a un episodio nuevo,a una lista mutable
         List<Episodio> episodios = temporadas.stream()
@@ -87,20 +85,41 @@ public class Main {
         //episodios.forEach(System.out::println);
 
         // busqueda de episodios a partir de un anio
-        System.out.println("Escriba el anio que desee buscar");
-        var fecha = teclado.nextInt();
-        teclado.nextLine(); // esto se hace para captura bien el dato
+//        System.out.println("Escriba el anio que desee buscar");
+//        var fecha = teclado.nextInt();
+//        teclado.nextLine(); // esto se hace para captura bien el dato
+//
+//        LocalDate fechaBusqueda = LocalDate.of(fecha, 1, 1);
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-        LocalDate fechaBusqueda = LocalDate.of(fecha, 1, 1);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+//        episodios.stream()
+//                .filter(e -> e.getFechaDeLanzamiento() != null && e.getFechaDeLanzamiento().isAfter(fechaBusqueda))
+//                .forEach(
+//                e -> System.out.println("Titlo " + e.getTitulo() +
+//                        "Evaluacion " + e.getEvaluacion() +
+//                        "Fecha " + e.getFechaDeLanzamiento().format(formatter)
+//                ));
+        //busca episodios por coincidencia o por una parte del titulo
 
-        episodios.stream()
-                .filter(e -> e.getFechaDeLanzamiento() != null && e.getFechaDeLanzamiento().isAfter(fechaBusqueda))
-                .forEach(
-                e -> System.out.println("Titlo " + e.getTitulo() +
-                        "Evaluacion " + e.getEvaluacion() +
-                        "Fecha " + e.getFechaDeLanzamiento().format(formatter)
-                ));
+//        System.out.println("El titulo del episodio que desea ver: ");
+//        var pedazoTitulo = teclado.nextLine();
+//        Optional<Episodio> episodioEncontrado = episodios.stream()
+//                // convertimos el titulo en mayusculas para encontrar las concidencias
+//                .filter(e -> e.getTitulo().toUpperCase().contains(pedazoTitulo.toUpperCase()))
+//                .findFirst();
+//        if (episodioEncontrado.isPresent()) {
+//            System.out.println("episodio encontrado");
+//            System.out.println("Titulo: " + episodioEncontrado.get().getTitulo());
+//        } else {
+//            System.out.println("episodio no encontrado");
+//        }
+
+        // evaluacion por temporada usando Map<>
+        Map<Integer, Double > evaluacionPorTemporada = episodios.stream()
+                .filter(e-> e.getEvaluacion()>0.0)
+                .collect(Collectors.groupingBy(Episodio::getTemporada,
+                        Collectors.averagingDouble(Episodio::getEvaluacion )));
+        System.out.println(evaluacionPorTemporada);
 
     }
 }
