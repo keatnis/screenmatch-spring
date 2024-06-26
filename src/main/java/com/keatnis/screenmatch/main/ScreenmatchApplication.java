@@ -15,8 +15,10 @@ public class ScreenmatchApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        Main main = new Main();
-        main.mostrarMenu();
+//        Main main = new Main();
+//        main.mostrarMenu();
+        Menu menu = new Menu();
+        menu.mostrarMenu();
 //        EjemploStream ejemploStream = new EjemploStream();
 //        ejemploStream.mostrarEjemplos();
 

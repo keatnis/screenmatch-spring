@@ -1,4 +1,4 @@
-package com.keatnis.screenmatch.main;
+package com.keatnis.screenmatch.ejemplos;
 
 import java.util.Arrays;
 import java.util.List;

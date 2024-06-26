@@ -1,4 +1,4 @@
-package com.keatnis.screenmatch.main;
+package com.keatnis.screenmatch.ejemplos;
 
 import com.keatnis.screenmatch.model.DatosEpisodio;
 import com.keatnis.screenmatch.model.DatosSerie;
@@ -8,9 +8,6 @@ import com.keatnis.screenmatch.service.ConsumoAPI;
 import com.keatnis.screenmatch.service.ConvierteDatos;
 
 import java.net.URLEncoder;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
