@@ -22,6 +22,8 @@ public class Serie {
         // {Action, Crime,Comedy } usando split para separar por coma y solo el primer elemento[0]
         // usando trim() para que no  traiga ningun valor vacio
         this.genero = Categoria.fromString(datosSerie.genero().split(",")[0].trim());
+       // para usar chatGPT y traducir
+        // this.sinopsis = ConsultaChatGPT.obtenerTraduccion(datosSerie.sinopsis())
         this.sinopsis = datosSerie.sinopsis();
         this.poster = datosSerie.poster();
         this.actores = datosSerie.actores();
