@@ -3,6 +3,7 @@ package com.keatnis.screenmatch.main;
 import com.keatnis.screenmatch.model.DatosSerie;
 import com.keatnis.screenmatch.model.DatosTemporada;
 import com.keatnis.screenmatch.model.Serie;
+import com.keatnis.screenmatch.repository.SerieRepository;
 import com.keatnis.screenmatch.service.ConsumoAPI;
 import com.keatnis.screenmatch.service.ConvierteDatos;
 
@@ -20,8 +21,16 @@ public class Menu {
 
     private final String URL_BASE = "https://www.omdbapi.com/?t=";
     private final String API_KEY = "&apikey=57e2a7ad";
-    private List<DatosSerie > serieList = new ArrayList<>();
+    private List<DatosSerie> serieList = new ArrayList<>();
+
+    private SerieRepository serieRepository;
+
+    public Menu(SerieRepository serieRepository) {
+        this.serieRepository = serieRepository;
+    }
+
     public void mostrarMenu() {
+
         int opcion = -1;
         var menu = """
                 Opciones: 
@@ -80,18 +89,29 @@ public class Menu {
         temporadas.forEach(System.out::println);
 
     }
-    private void buscarSerieWeb(){
+
+    private void buscarSerieWeb() {
         DatosSerie datos = getDatosSerie();
-        serieList.add(datos);
+        //serieList.add(datos);
+        Serie serie = new Serie(datos);
+        serieRepository.save(serie);
         System.out.println(datos);
     }
+
     private void mostrarSeriesBuscadas() {
 //        serieList.forEach(System.out::println);
-        List<Serie> series = new ArrayList<>();
-        // convertimos la List de Recors y los datos de este en una clase Java de tipo Serie
-        series=  serieList.stream()
-                .map(s -> new Serie(s))
-                .collect(Collectors.toList());
+//        List<Serie> series = new ArrayList<>();
+//        // convertimos la List de Recors y los datos de este en una clase Java de tipo Serie
+//        series = serieList.stream()
+//                .map(s -> new Serie(s))
+//                .collect(Collectors.toList());
+//        //ordenamos por categoria
+//        series.stream()
+//                .sorted(Comparator.comparing(Serie::getGenero))
+//                .forEach(System.out::println);
+
+        // Traemos todas las series guardadas desde la base de datos
+        List<Serie> series = serieRepository.findAll();
         //ordenamos por categoria
         series.stream()
                 .sorted(Comparator.comparing(Serie::getGenero))

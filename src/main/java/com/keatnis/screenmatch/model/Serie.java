@@ -1,18 +1,33 @@
 package com.keatnis.screenmatch.model;
+import jakarta.persistence.*;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
-
-import java.util.Optional;
+import java.util.List;
 import java.util.OptionalDouble;
 
+@Entity
+@Table(name = "serie")
 public class Serie {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    //para que no se repita la serie y sea unico
+    @Column(unique = true)
     private String titulo;
     private Integer totalTemporadas;
     private Double evaluacion;
+    // EnumType.ORDINAL es por posicion pero string trae el texto completo
+    @Enumerated(EnumType.STRING)
     private Categoria genero;
     private String sinopsis;
     private String poster;
     private String actores;
+
+    @Transient
+    List<Episodio> episodios;
+
+    public Serie() {
+    }
 
     public Serie(DatosSerie datosSerie) {
         this.titulo = datosSerie.titulo();
@@ -22,12 +37,20 @@ public class Serie {
         // {Action, Crime,Comedy } usando split para separar por coma y solo el primer elemento[0]
         // usando trim() para que no  traiga ningun valor vacio
         this.genero = Categoria.fromString(datosSerie.genero().split(",")[0].trim());
-       // para usar chatGPT y traducir
+        // para usar chatGPT y traducir
         // this.sinopsis = ConsultaChatGPT.obtenerTraduccion(datosSerie.sinopsis())
         this.sinopsis = datosSerie.sinopsis();
         this.poster = datosSerie.poster();
         this.actores = datosSerie.actores();
 
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getTitulo() {
@@ -88,12 +111,12 @@ public class Serie {
 
     @Override
     public String toString() {
-        return  " genero=" + genero +
+        return " genero=" + genero +
                 " titulo='" + titulo + '\'' +
                 ", totalTemporadas=" + totalTemporadas +
                 ", evaluacion=" + evaluacion +
                 ", sinopsis='" + sinopsis + '\'' +
                 ", poster='" + poster + '\'' +
-                ", actores='" + actores + '\'' ;
+                ", actores='" + actores + '\'';
     }
 }
