@@ -1,14 +1,28 @@
 package com.keatnis.screenmatch.model;
 
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
+@Entity
+@Table(name = "episodio")
+
 public class Episodio {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String titulo;
     private Integer temporada;
     private Integer numeroEpisodio;
     private Double evaluacion;
     private LocalDate fechaDeLanzamiento;
+
+    @ManyToOne
+    private Serie serie;
+
+    public Episodio() {
+    }
 
     public Episodio(Integer numero, DatosEpisodio d) {
         this.temporada = numero;
@@ -29,6 +43,22 @@ public class Episodio {
         }
 
 
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Serie getSerie() {
+        return serie;
+    }
+
+    public void setSerie(Serie serie) {
+        this.serie = serie;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getTitulo() {

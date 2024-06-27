@@ -22,8 +22,9 @@ public class Serie {
     private String sinopsis;
     private String poster;
     private String actores;
-
-    @Transient
+    //para que al hacer un cambio en serie tambien se debe de alterar la tabla de episodios
+    //fetch
+    @OneToMany(mappedBy = "serie", cascade =CascadeType.ALL , fetch = FetchType.EAGER)
     List<Episodio> episodios;
 
     public Serie() {
@@ -43,6 +44,16 @@ public class Serie {
         this.poster = datosSerie.poster();
         this.actores = datosSerie.actores();
 
+    }
+
+    public List<Episodio> getEpisodios() {
+        return episodios;
+    }
+
+    public void setEpisodios(List<Episodio> episodios) {
+        // para cada elemento de la lista le asignamos el id la serie
+        episodios.forEach(e -> e.setSerie(this));
+        this.episodios = episodios;
     }
 
     public Long getId() {

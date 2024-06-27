@@ -2,16 +2,14 @@ package com.keatnis.screenmatch.main;
 
 import com.keatnis.screenmatch.model.DatosSerie;
 import com.keatnis.screenmatch.model.DatosTemporada;
+import com.keatnis.screenmatch.model.Episodio;
 import com.keatnis.screenmatch.model.Serie;
 import com.keatnis.screenmatch.repository.SerieRepository;
 import com.keatnis.screenmatch.service.ConsumoAPI;
 import com.keatnis.screenmatch.service.ConvierteDatos;
 
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Menu {
@@ -22,7 +20,7 @@ public class Menu {
     private final String URL_BASE = "https://www.omdbapi.com/?t=";
     private final String API_KEY = "&apikey=57e2a7ad";
     private List<DatosSerie> serieList = new ArrayList<>();
-
+    private List<Serie> series = new ArrayList<>();
     private SerieRepository serieRepository;
 
     public Menu(SerieRepository serieRepository) {
@@ -76,17 +74,38 @@ public class Menu {
     }
 
     private void buscarEpisodioPorSerie() {
-        DatosSerie datosSerie = getDatosSerie();
-        List<DatosTemporada> temporadas = new ArrayList<>();
+        mostrarSeriesBuscadas();
+        System.out.println("Escriba el nombre de la serie que desee buscar: ");
+        var nombreSerie = scanner.nextLine();
+        // buscamos la series guardadas en la base de datos
 
-        for (int i = 1; i < datosSerie.totalTemporadas(); i++) {
-            var json = consumoAPI.obtenerDatos(URL_BASE + URLEncoder.encode(datosSerie.titulo()) + "&Season=" + i +
-                    API_KEY);
+        Optional<Serie> serie = series.stream()
+                .filter(s -> s.getTitulo().toLowerCase().contains(nombreSerie.toLowerCase()))
+                .findFirst();
+        if (serie.isPresent()) {
+            var serieEncontrada = serie.get();
+            List<DatosTemporada> temporadas = new ArrayList<>();
 
-            DatosTemporada datosTemporada = conversor.obtenerDatos(json, DatosTemporada.class);
-            temporadas.add(datosTemporada);
+            for (int i = 1; i < serieEncontrada.getTotalTemporadas(); i++) {
+                var json = consumoAPI.obtenerDatos(URL_BASE + URLEncoder.encode(serieEncontrada.getTitulo()) + "&Season=" + i +
+                        API_KEY);   
+
+                DatosTemporada datosTemporada = conversor.obtenerDatos(json, DatosTemporada.class);
+                temporadas.add(datosTemporada);
+            }
+            temporadas.forEach(System.out::println);
+            //vamos a convertir la lista de temporadas a lista de episodios
+
+            List<Episodio> episodios = temporadas.stream()
+                    .flatMap(d -> d.episodios().stream()
+                            .map(e -> new Episodio(d.numero(), e)))
+                    .collect(Collectors.toList());
+            serieEncontrada.setEpisodios(episodios);
+            serieRepository.save(serieEncontrada);
+        } else {
+            System.out.println("serie no encontrada");
         }
-        temporadas.forEach(System.out::println);
+
 
     }
 
@@ -99,19 +118,9 @@ public class Menu {
     }
 
     private void mostrarSeriesBuscadas() {
-//        serieList.forEach(System.out::println);
-//        List<Serie> series = new ArrayList<>();
-//        // convertimos la List de Recors y los datos de este en una clase Java de tipo Serie
-//        series = serieList.stream()
-//                .map(s -> new Serie(s))
-//                .collect(Collectors.toList());
-//        //ordenamos por categoria
-//        series.stream()
-//                .sorted(Comparator.comparing(Serie::getGenero))
-//                .forEach(System.out::println);
 
         // Traemos todas las series guardadas desde la base de datos
-        List<Serie> series = serieRepository.findAll();
+        series = serieRepository.findAll();
         //ordenamos por categoria
         series.stream()
                 .sorted(Comparator.comparing(Serie::getGenero))
