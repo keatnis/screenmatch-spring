@@ -19,6 +19,7 @@ public class Menu {
     private List<DatosSerie> serieList = new ArrayList<>();
     private List<Serie> series = new ArrayList<>();
     private SerieRepository serieRepository;
+    private Optional<Serie> serieBuscada;
 
     public Menu(SerieRepository serieRepository) {
         this.serieRepository = serieRepository;
@@ -36,6 +37,8 @@ public class Menu {
                 5. Top 5 de mejores series
                 6. Buscar por categoria
                 7. Buscar por Temporadas y Evaluacion
+                8. Buscar episodios por titulo
+                9. Top 5 de episodios por serie
                 0. Salir
                 """;
         while (opcion != 0) {
@@ -65,6 +68,13 @@ public class Menu {
                 case 7:
                     filtrarSeriesPorTemporadaYEvaluacion();
                     break;
+                case 8:
+                    buscarEpisodiosPorTitulo();
+                    break;
+                case 9:
+                    buscarTop5Episodios();
+                    break;
+
                 case 0:
                     System.out.println("Cerrando aplicacion ... ");
                     break;
@@ -135,7 +145,7 @@ public class Menu {
     private void buscarSeriePorTitulo() {
         System.out.println("Ingrese el nombre de la serie que desee buscar: ");
         var nombreSerie = scanner.nextLine();
-        Optional<Serie> serieBuscada = serieRepository.findByTituloContainsIgnoreCase(nombreSerie);
+        serieBuscada = serieRepository.findByTituloContainsIgnoreCase(nombreSerie);
         if (serieBuscada.isPresent()) {
             System.out.println(serieBuscada.get());
         } else {
@@ -174,10 +184,31 @@ public class Menu {
         System.out.println("¿Com evaluación apartir de cuál valor? ");
         var evaluacion = scanner.nextDouble();
         scanner.nextLine();
-        List<Serie> filtroSeries =
-                serieRepository.findByTotalTemporadasLessThanEqualAndEvaluacionGreaterThanEqual(totalTemporadas, evaluacion);
+        List<Serie> filtroSeries = serieRepository.buscarPorTemporadasYEvaluacion(totalTemporadas, evaluacion);
+        // serieRepository.findByTotalTemporadasLessThanEqualAndEvaluacionGreaterThanEqual(totalTemporadas, evaluacion);
         System.out.println("*** Series filtradas ***");
         filtroSeries.forEach(s ->
                 System.out.println(s.getTitulo() + "  - evaluacion: " + s.getEvaluacion()));
+    }
+
+    private void buscarEpisodiosPorTitulo() {
+        System.out.println("Escribe el nombre del episodio que desees buscar: ");
+        var tituloEpisodio = scanner.nextLine();
+
+        List<Episodio> episodios = serieRepository.episodiosPorNombre(tituloEpisodio);
+        episodios.forEach(e -> System.out.printf("Serie: %s Temporada %s Episodio %s Evaluacion %s \n",
+                e.getSerie().getTitulo(), e.getTemporada(), e.getNumeroEpisodio(), e.getSerie().getEvaluacion()));
+    }
+
+    private void buscarTop5Episodios() {
+        buscarSeriePorTitulo();
+        if (serieBuscada.isPresent()) {
+            Serie serie = serieBuscada.get();
+            List<Episodio> topEpisodios = serieRepository.top5Episodios(serie);
+            topEpisodios.forEach(e ->
+                    System.out.printf("Serie: %s - Temporada %s - Episodio %s - Evaluación %s\n",
+                            e.getSerie().getTitulo(), e.getTemporada(), e.getTitulo(), e.getEvaluacion()));
+
+        }
     }
 }
