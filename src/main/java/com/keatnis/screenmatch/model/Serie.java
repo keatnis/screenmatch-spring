@@ -128,6 +128,7 @@ public class Serie {
                 ", evaluacion=" + evaluacion +
                 ", sinopsis='" + sinopsis + '\'' +
                 ", poster='" + poster + '\'' +
-                ", actores='" + actores + '\'';
+                ", actores='" + actores + '\''+
+                ", episodios ='" + episodios + '\'';
     }
 }

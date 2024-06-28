@@ -1,9 +1,6 @@
 package com.keatnis.screenmatch.main;
 
-import com.keatnis.screenmatch.model.DatosSerie;
-import com.keatnis.screenmatch.model.DatosTemporada;
-import com.keatnis.screenmatch.model.Episodio;
-import com.keatnis.screenmatch.model.Serie;
+import com.keatnis.screenmatch.model.*;
 import com.keatnis.screenmatch.repository.SerieRepository;
 import com.keatnis.screenmatch.service.ConsumoAPI;
 import com.keatnis.screenmatch.service.ConvierteDatos;
@@ -35,6 +32,10 @@ public class Menu {
                 1. Buscar serie
                 2. Buscar episodio por serie
                 3. Mostrar series buscadas
+                4. Buscar serie por titulo
+                5. Top 5 de mejores series
+                6. Buscar por categoria
+                7. Buscar por Temporadas y Evaluacion
                 0. Salir
                 """;
         while (opcion != 0) {
@@ -52,6 +53,18 @@ public class Menu {
                 case 3:
                     mostrarSeriesBuscadas();
                     break;
+                case 4:
+                    buscarSeriePorTitulo();
+                    break;
+                case 5:
+                    buscarTop5Series();
+                    break;
+                case 6:
+                    buscarSeriesPorCategoria();
+                    break;
+                case 7:
+                    filtrarSeriesPorTemporadaYEvaluacion();
+                    break;
                 case 0:
                     System.out.println("Cerrando aplicacion ... ");
                     break;
@@ -63,6 +76,7 @@ public class Menu {
 
 
     }
+
 
     private DatosSerie getDatosSerie() {
         System.out.println("Ingrese el nombre de la serie que desee buscar: ");
@@ -88,7 +102,7 @@ public class Menu {
 
             for (int i = 1; i < serieEncontrada.getTotalTemporadas(); i++) {
                 var json = consumoAPI.obtenerDatos(URL_BASE + URLEncoder.encode(serieEncontrada.getTitulo()) + "&Season=" + i +
-                        API_KEY);   
+                        API_KEY);
 
                 DatosTemporada datosTemporada = conversor.obtenerDatos(json, DatosTemporada.class);
                 temporadas.add(datosTemporada);
@@ -109,12 +123,24 @@ public class Menu {
 
     }
 
+
     private void buscarSerieWeb() {
         DatosSerie datos = getDatosSerie();
         //serieList.add(datos);
         Serie serie = new Serie(datos);
         serieRepository.save(serie);
         System.out.println(datos);
+    }
+
+    private void buscarSeriePorTitulo() {
+        System.out.println("Ingrese el nombre de la serie que desee buscar: ");
+        var nombreSerie = scanner.nextLine();
+        Optional<Serie> serieBuscada = serieRepository.findByTituloContainsIgnoreCase(nombreSerie);
+        if (serieBuscada.isPresent()) {
+            System.out.println(serieBuscada.get());
+        } else {
+            System.out.println("Serie no encontrada");
+        }
     }
 
     private void mostrarSeriesBuscadas() {
@@ -127,4 +153,31 @@ public class Menu {
                 .forEach(System.out::println);
     }
 
+    private void buscarTop5Series() {
+        List<Serie> topSeries = serieRepository.findTop5ByOrderByEvaluacionDesc();
+        topSeries.forEach(s -> System.out.println("Serie: " + s.getTitulo() + " Evaluacion: " + s.getEvaluacion()));
+    }
+
+    private void buscarSeriesPorCategoria() {
+        System.out.println("Ingrese la categoria/genero que desee buscar");
+        var genero = scanner.nextLine();
+        var categoria = Categoria.fromEspaniol(genero);
+        List<Serie> seriesPorCategoria = serieRepository.findByGenero(categoria);
+        System.out.println("Las series de la categoria " + genero);
+        seriesPorCategoria.forEach(System.out::println);
+    }
+
+    private void filtrarSeriesPorTemporadaYEvaluacion() {
+        System.out.println("¿Filtrar séries con cuántas temporadas? ");
+        var totalTemporadas = scanner.nextInt();
+        scanner.nextLine();
+        System.out.println("¿Com evaluación apartir de cuál valor? ");
+        var evaluacion = scanner.nextDouble();
+        scanner.nextLine();
+        List<Serie> filtroSeries =
+                serieRepository.findByTotalTemporadasLessThanEqualAndEvaluacionGreaterThanEqual(totalTemporadas, evaluacion);
+        System.out.println("*** Series filtradas ***");
+        filtroSeries.forEach(s ->
+                System.out.println(s.getTitulo() + "  - evaluacion: " + s.getEvaluacion()));
+    }
 }
