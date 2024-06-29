@@ -4,7 +4,7 @@ package com.keatnis.screenmatch.dto;
 import com.keatnis.screenmatch.model.Categoria;
 
 public record SerieDTO(
-
+        Long id,
         String titulo,
 
         Integer totalTemporadas,
